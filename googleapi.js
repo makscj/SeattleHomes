@@ -65,6 +65,22 @@ function initMap() {
         calculateAndDisplayRoute(directionsService, directionsDisplayOTC, otc_coord, "#otc-time");
     });
 
+    $('#searchbar').keypress(function (e) {
+        if (e.which == 13) {
+            calculateAndDisplayRoute(directionsService, directionsDisplayCH, caphill_coord, "#ch-time");
+            calculateAndDisplayRoute(directionsService, directionsDisplayOTC, otc_coord, "#otc-time"); 
+            return false; //<---- Add this line
+        }
+      });
+
+    //   $('#searchbar').change(function () {
+        
+    //         calculateAndDisplayRoute(directionsService, directionsDisplayCH, caphill_coord, "#ch-time");
+    //         calculateAndDisplayRoute(directionsService, directionsDisplayOTC, otc_coord, "#otc-time"); 
+    //         return false; //<---- Add this line
+        
+    //   });
+
     //calculateAndDisplayRoute(directionsService, directionsDisplay);
 }
 
@@ -76,17 +92,28 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay, destinat
     var encodedOrigin = encodeURI(searchOrigin);
     //console.log(searchOrigin);
     
+    var nextTime = new Date();
+    if(nextTime.getHours() > 9){
+        nextTime.setDate(nextTime.getDate() + 1)
+    }
+    nextTime.setHours(9,0,0,0);
+
+    // console.log(nextTime);
+
     directionsService.route({
         origin: searchOrigin,
         destination: destination,
-        travelMode: google.maps.TravelMode["TRANSIT"]
+        travelMode: google.maps.TravelMode["TRANSIT"],
+        transitOptions:{
+            arrivalTime: nextTime
+        }
     },
         function (response, status) {
             var duration = 0;
             response.routes[0].legs.forEach(function(x){
                 duration += x.duration.value;
             })
-            console.log(duration);
+            // console.log(duration);
             $(time).text(Math.floor(duration/60).toString() + " minutes");
             // console.log(response.routes[0].legs);
             if (status == "OK") {
